@@ -10,7 +10,7 @@ class ApplicationTests {
 	@Test
 	void contextLoads() {
 		// CI Fail Test
-		Assertions.assertThat("A").isEqualTo("B");
+//		Assertions.assertThat("A").isEqualTo("B");
 	}
 
 }
