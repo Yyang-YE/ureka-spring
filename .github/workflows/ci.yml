@@ -69,7 +69,7 @@ jobs:
     steps:
     # 2-1. EC2 접속 및 jar 파일 실행
     - name: SSH로 EC2에 접속하기
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@main
       with:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SSH_USER }}
