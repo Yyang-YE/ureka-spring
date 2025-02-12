@@ -2,9 +2,9 @@ name: CI-Build check
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "develop" ]
   push:
-    branches: [ "main" ]
+    branches: [ "develop" ]
 
 permissions:
   contents: read
@@ -41,6 +41,18 @@ jobs:
       run: ./gradlew clean build --stacktrace  # Gradle을 실행하여 빌드 수행
       shell: bash  # Bash 셸에서 실행
 
+    - name: 빌드된 파일 이름 변경하기
+      run: mv ./build/libs/*SNAPSHOT.jar ./cicdtest.jar
+
+    - name: SCP로 EC2에 빌드된 파일 전송하기
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: cicdtest.jar
+        target: /home/ubuntu
+        
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
@@ -49,6 +61,23 @@ jobs:
         # 빌드 단계에서 생성된 jar파일
         path: build/libs/Project-0.0.1-SNAPSHOT.jar
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+  
+    steps:
+    # 2-1. EC2 접속 및 jar 파일 실행
+    - name: SSH로 EC2에 접속하기
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script_stop: true
+        script: |
+          sudo fuser -k -n tcp 8080 || true
+          sudo nohup java -jar cicdtest.jar > ./output.log 2>&1 &    
 
   # dependency-submission:
   #   runs-on: ubuntu-latest
