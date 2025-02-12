@@ -53,13 +53,13 @@ jobs:
         source: cicdtest.jar
         target: /home/ubuntu
         
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Project
-        # 업로드할 파일의 경로를 지정 (build/libs에 Project jar 파일을 업로드한다.)
-        # 빌드 단계에서 생성된 jar파일
-        path: build/libs/Project-0.0.1-SNAPSHOT.jar
+    # - name: Upload build artifact
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: Project
+    #     # 업로드할 파일의 경로를 지정 (build/libs에 Project jar 파일을 업로드한다.)
+    #     # 빌드 단계에서 생성된 jar파일
+    #     path: build/libs/Project-0.0.1-SNAPSHOT.jar
 
   deploy:
     needs: build
