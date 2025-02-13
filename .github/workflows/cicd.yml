@@ -106,9 +106,6 @@ jobs:
         envs: GITHUB_SHA
         script: |
           cd /home/ubuntu
-          docker stop docker-test || true
-          docker rm docker-test || true
           docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
-          chmod 777 ./deploy.sh
-          ./deploy.sh
+          docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
           docker image prune -f
