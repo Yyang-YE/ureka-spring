@@ -105,6 +105,6 @@ jobs:
         envs: GITHUB_SHA
         script: |
           sudo docker ps
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test
-          sudo docker run -d -p 8080:8082 ${{ secrets.DOCKER_USERNAME }}/docker-test
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:${{ github.sha }}
+          sudo docker run -d -p 8080:8082 ${{ secrets.DOCKER_USERNAME }}/docker-test:${{ github.sha }}
           sudo docker image prune -f
