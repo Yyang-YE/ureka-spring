@@ -46,16 +46,23 @@ jobs:
   
     # Gradle 권한 변경
     - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      run: chmod +x ./gradlew
 
     # Build 진행
     - name: Build with Gradle
-      env:
-        SPRING_PROFILES_ACTIVE: test  # Spring Boot의 활성 프로파일을 "test"로 설정
+#      env:
+#        SPRING_PROFILES_ACTIVE: test  # Spring Boot의 활성 프로파일을 "test"로 설정
       run: ./gradlew clean build --stacktrace  # Gradle을 실행하여 빌드 수행
       shell: bash  # Bash 셸에서 실행
 
-#    - name: 빌드된 파일 이름 변경하기
+    - name: 빌드된 JAR 파일 확인
+      run: ls -l build/libs
+
+    - name: Docker 빌드 전 프로젝트 구조 확인
+      run: ls -R
+
+
+      #    - name: 빌드된 파일 이름 변경하기
 #      run: mv ./build/libs/*SNAPSHOT.jar ./cicdtest.jar
 
       # docker build & push to production
@@ -101,16 +108,3 @@ jobs:
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test
           sudo docker run -d -p 8080:8082 ${{ secrets.DOCKER_USERNAME }}/docker-test
           sudo docker image prune -f
-    
-    # # 2-1. EC2 접속 및 jar 파일 실행
-    # - name: SSH로 EC2에 접속하기
-    #   uses: appleboy/ssh-action@master
-    #   with:
-    #     host: ${{ secrets.SERVER_IP }}
-    #     username: ${{ secrets.SSH_USER }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     script_stop: true
-    #     script: |
-    #       sudo fuser -k -n tcp 8080 || true
-    #       sudo nohup java -jar cicdtest.jar > ./output.log 2>&1 &    
-          
