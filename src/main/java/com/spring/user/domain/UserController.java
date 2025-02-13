@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     @GetMapping
     public String showAny() {
-        return "안녕하세요, CICD 입니다.";
+        return "안녕하세요, 진짜 제발 한번만.";
     }
 }
