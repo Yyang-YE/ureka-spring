@@ -32,17 +32,6 @@ jobs:
     # Gradle 환경 설치
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-
-#    # Gradle 캐싱
-#    - name: Gradle Caching
-#      uses: actions/cache@v3
-#      with:
-#        path: |
-#          ~/.gradle/caches
-#          ~/.gradle/wrapper
-#        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-#        restore-keys: |
-#          ${{ runner.os }}-gradle-
   
     # Gradle 권한 변경
     - name: Grant execute permission for gradlew
@@ -53,8 +42,8 @@ jobs:
       run: ./gradlew clean build --stacktrace
       shell: bash  # Bash 셸에서 실행
 
-    - name : Save Docker Image
-      run : docker save spring-boot-app > spring-boot-app.tar
+    # - name : Save Docker Image
+    #   run : docker save spring-boot-app > spring-boot-app.tar
 
 
 #    - name: 빌드된 파일 이름 변경하기
@@ -62,15 +51,11 @@ jobs:
 
       # docker build & push to production
     - name: Docker build & push
-      # if: contains(github.ref, 'main')
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: spring-boot-app.tar
-        target: /home/ubuntu
-        # overwrite: true  # 기존 파일 덮어쓰기
+      if: contains(github.ref, 'main')
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/docker-test -f ./Dockerfile .
+        docker push ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
 
   deploy:
     needs: build
@@ -95,10 +80,10 @@ jobs:
         script_stop: true
         script: |
           docker load < /home/ubuntu/spring-boot-app.tar
-          docker stop spring-boot-app || true
-          docker rm spring-boot-app || true
+          # docker stop spring-boot-app || true
+          # docker rm spring-boot-app || true
           # sudo docker rm -f $(docker ps -qa)
-          # docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
           # docker-compose -f docker-compose up -d
           docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
-          # docker image prune -f
+          docker image prune -f
