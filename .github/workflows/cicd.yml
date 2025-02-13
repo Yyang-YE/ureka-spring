@@ -105,7 +105,8 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         envs: GITHUB_SHA
         script: |
-          cd /home/ubuntu
+          sudo docker rm -f $(docker ps -qa)
           docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
-          docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
+          docker-compose -f docker-compose up -d
+          # docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
           docker image prune -f
