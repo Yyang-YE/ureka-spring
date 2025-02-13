@@ -79,10 +79,19 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script_stop: true
         script: |
-          docker stop $(docker ps -a -q) # Stop all containers
-          docker rm -fv $(docker ps -aq)  # Remove all containers
-          sudo lsof -i -P -n | grep 8080  # List who's using the port
+          # 모든 컨테이너 중지 및 제거
+          docker stop $(docker ps -a -q) || true  # 컨테이너가 없으면 오류를 무시하도록 설정
+          docker rm -fv $(docker ps -aq) || true   # 중지된 컨테이너가 없으면 오류를 무시하도록 설정
+        
+          # 포트 8080을 사용 중인 프로세스 확인
+          sudo lsof -i -P -n | grep 8080 || echo "포트 8080을 사용 중인 프로세스 없음"
+        
+          # 최신 Docker 이미지 풀
           docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
-          # docker-compose -f docker-compose up -d
+        
+          # Docker 컨테이너 실행
           docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
+        
+          # 불필요한 Docker 이미지 정리
           docker image prune -f
+
