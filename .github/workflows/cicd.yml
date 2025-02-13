@@ -55,11 +55,11 @@ jobs:
       run: ./gradlew clean build --stacktrace  # Gradle을 실행하여 빌드 수행
       shell: bash  # Bash 셸에서 실행
 
-    - name: 빌드된 JAR 파일 확인
-      run: ls -l build/libs
+    # - name: 빌드된 JAR 파일 확인
+    #   run: ls -l build/libs
 
-    - name: Docker 빌드 전 프로젝트 구조 확인
-      run: ls -R
+    # - name: Docker 빌드 전 프로젝트 구조 확인
+    #   run: ls -R
 
 
       #    - name: 빌드된 파일 이름 변경하기
@@ -79,6 +79,16 @@ jobs:
     if: github.event_name == 'push'
   
     steps:
+    - name: Transfer deploy.sh to EC2
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: deploy.sh
+        target: /home/ubuntu
+        overwrite: true  # 기존 파일 덮어쓰기
+      
 #    # Dockerfile 위치 확인
 #    - name: Check if Dockerfile exists
 #      run: ls -l
@@ -95,9 +105,10 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         envs: GITHUB_SHA
         script: |
-          # sudo docker ps
+          cd /home/ubuntu
+          docker stop docker-test || true
+          docker rm docker-test || true
           docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
           chmod 777 ./deploy.sh
           ./deploy.sh
-          # sudo docker run -d -p 8080:8082 ${{ secrets.DOCKER_USERNAME }}/docker-test:${{ github.sha }}
-          sudo docker image prune -f
+          docker image prune -f
