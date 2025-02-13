@@ -79,10 +79,9 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script_stop: true
         script: |
-          docker load < /home/ubuntu/spring-boot-app.tar
-          # docker stop spring-boot-app || true
-          # docker rm spring-boot-app || true
-          # sudo docker rm -f $(docker ps -qa)
+          docker stop $(docker ps -a -q) # Stop all containers
+          docker rm -fv $(docker ps -aq)  # Remove all containers
+          sudo lsof -i -P -n | grep 8080  # List who's using the port
           docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
           # docker-compose -f docker-compose up -d
           docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
