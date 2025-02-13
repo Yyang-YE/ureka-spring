@@ -74,6 +74,13 @@ jobs:
     if: github.event_name == 'push'
   
     steps:
+    # Dockerfile 위치 확인
+    - name: Check if Dockerfile exists
+      run: ls -l
+    - name: Check Dockerfile location
+      run: find . -name "Dockerfile"
+
+
     # docker build & push to production
     - name: Docker build & push
       if: contains(github.ref, 'main')
